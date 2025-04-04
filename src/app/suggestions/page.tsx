@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Lightbulb, 
   TrendingUp, 
@@ -10,9 +10,6 @@ import {
   DollarSign,
   Clock,
   Moon,
-  Send,
-  Bot,
-  User,
   Loader,
   PiggyBank,
   Target,
@@ -21,18 +18,10 @@ import {
 import Link from 'next/link';
 
 const Suggestions = () => {
-  const [chatMessages, setChatMessages] = useState([
-    { id: 1, sender: 'bot', text: 'Hello! I\'m your MOON.ai financial assistant. How can I help with your financial goals today?' }
-  ]);
-  const [inputMessage, setInputMessage] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isSending, setIsSending] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
-  const chatContainerRef = useRef(null);
-
-  const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
   const priorityColors = {
     urgent: 'bg-blue-900/30 border-blue-400/50 text-blue-200',
@@ -215,168 +204,6 @@ const Suggestions = () => {
     fetchSuggestions();
   }, [fetchSuggestions]); // Only depend on fetchSuggestions
 
-  // Auto-scroll to bottom of chat when new messages are added
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [chatMessages]);
-
-  const handleSendMessage = async () => {
-    console.log('handleSendMessage called with input:', inputMessage);
-    if (inputMessage.trim() === '' || isSending) {
-      console.log('Message empty or already sending, returning');
-      return;
-    }
-    
-    // Add user message
-    const newUserMessage = {
-      id: chatMessages.length + 1,
-      sender: 'user',
-      text: inputMessage
-    };
-    
-    console.log('Adding user message to chat:', newUserMessage);
-    setChatMessages(prev => [...prev, newUserMessage]);
-    
-    const messageToSend = inputMessage;
-    setInputMessage('');
-    setIsSending(true);
-    
-    try {
-      // Check if we should use Token Metrics API (if query includes crypto keywords)
-      const isCryptoQuery = messageToSend.toLowerCase().includes('crypto') || 
-                           messageToSend.toLowerCase().includes('bitcoin') || 
-                           messageToSend.toLowerCase().includes('eth') ||
-                           messageToSend.toLowerCase().includes('token') ||
-                           messageToSend.toLowerCase().includes('blockchain');
-      
-      if (isCryptoQuery && API_KEY) {
-        console.log('Using Token Metrics API for crypto query');
-        try {
-          const response = await fetch('https://api.tokenmetrics.com/v2/tmai', {
-            method: 'POST',
-            headers: {
-              'accept': 'application/json',
-              'api_key': API_KEY,
-              'content-type': 'application/json'
-            },
-            body: JSON.stringify({
-              messages: [
-                {
-                  user: messageToSend
-                }
-              ]
-            })
-          });
-          
-          if (!response.ok) {
-            throw new Error(`Token Metrics API error: ${response.status}`);
-          }
-          
-          const data = await response.json();
-          console.log('Token Metrics API Response:', data);
-          
-          // Extract the answer from the correct field in the response
-          if (data && data.success && data.answer) {
-            const botResponse = {
-              id: chatMessages.length + 2,
-              sender: 'bot',
-              text: data.answer
-            };
-            
-            setChatMessages(prev => [...prev, botResponse]);
-            setIsSending(false);
-            return;
-          } else {
-            throw new Error('Received response from Token Metrics API but could not find the answer.');
-          }
-        } catch (tokenApiError) {
-          console.error('Error with Token Metrics API:', tokenApiError);
-          // Fall back to regular processing if Token Metrics API fails
-        }
-      }
-      
-      const walletAddress = localStorage.getItem('walletAddress');
-      console.log('Wallet address from localStorage:', walletAddress);
-      
-      if (!walletAddress) {
-        // Demo mode - simulate a response instead of calling the API
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
-        
-        let response;
-        if (messageToSend.toLowerCase().includes('savings') || messageToSend.toLowerCase().includes('save')) {
-          response = "Based on your spending patterns, you could save approximately $350 per month by reducing discretionary spending. I recommend setting up an automatic transfer to your savings account on paydays.";
-        } else if (messageToSend.toLowerCase().includes('debt') || messageToSend.toLowerCase().includes('loan')) {
-          response = "I suggest prioritizing your high-interest credit card debt first. Using the debt avalanche method, you could be debt-free in approximately 18 months with your current payment level.";
-        } else if (messageToSend.toLowerCase().includes('invest') || messageToSend.toLowerCase().includes('portfolio')) {
-          response = "Your current asset allocation is too concentrated in a single sector. Consider diversifying by adding index funds to reduce risk while maintaining similar returns.";
-        } else if (messageToSend.toLowerCase().includes('budget')) {
-          response = "Looking at your spending patterns, your housing costs are within the recommended 30% of income, but your food and entertainment spending is above average. You might want to consider setting category limits in these areas.";
-        } else {
-          response = "I'm here to help with your financial planning questions. You can ask me about savings strategies, debt management, investment options, or budget optimization.";
-        }
-        
-        const botResponse = {
-          id: chatMessages.length + 2,
-          sender: 'bot',
-          text: response
-        };
-        
-        setChatMessages(prev => [...prev, botResponse]);
-      } else {
-        // Real API call
-        console.log('About to call API with payload:', { query: messageToSend });
-        const response = await fetch(`https://localhost5000/agent/chat/${walletAddress}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ query: messageToSend }),
-        });
-
-        console.log('API response status:', response.status);
-        
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status} ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        console.log('API response data:', data);
-        
-        // Add bot response
-        const botResponse = {
-          id: chatMessages.length + 2,
-          sender: 'bot',
-          text: data.analysis || data.response || "I'm sorry, I couldn't process your request. Please try again."
-        };
-
-        console.log('Adding bot response to chat:', botResponse);
-        setChatMessages(prev => [...prev, botResponse]);
-      }
-    } catch (error) {
-      console.error('Chat error:', error);
-      
-      // Add error message from bot
-      const errorResponse = {
-        id: chatMessages.length + 2,
-        sender: 'bot',
-        text: `I encountered an error: ${error.message}. Please try again later.`
-      };
-      
-      console.log('Adding error response to chat:', errorResponse);
-      setChatMessages(prev => [...prev, errorResponse]);
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-blue-900 to-blue-950 text-white flex items-center justify-center">
@@ -424,199 +251,113 @@ const Suggestions = () => {
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-6 p-8 sm:px-20 pb-20">
+      <div className="max-w-6xl mx-auto p-8 sm:px-20 pb-20">
         {/* Main Content Area */}
-        <div className="flex-1">
-          <div className="bg-white/10 backdrop-blur-lg rounded-lg border border-blue-800/50 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-6">
-              <div className="flex items-center gap-2 text-xl font-bold">
-                <Lightbulb className="w-6 h-6" />
-                Financial Suggestions &amp; Recommendations
-              </div>
-              <p className="text-blue-200">Personalized suggestions based on your financial analysis</p>
+        <div className="bg-white/10 backdrop-blur-lg rounded-lg border border-blue-800/50 overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-6">
+            <div className="flex items-center gap-2 text-xl font-bold">
+              <Lightbulb className="w-6 h-6" />
+              Financial Suggestions &amp; Recommendations
+            </div>
+            <p className="text-blue-200">Personalized suggestions based on your financial analysis</p>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Summary Section */}
+            <div className="bg-blue-900/30 p-4 rounded-lg border border-blue-400/50">
+              <h2 className="text-lg font-semibold text-blue-200 mb-2">Financial Analysis Summary</h2>
+              <p className="text-gray-300">
+                Based on your financial history, we have identified {suggestions.length} actionable 
+                opportunities for financial optimization and wealth-building.
+              </p>
             </div>
 
-            <div className="p-6 space-y-6">
-              {/* Summary Section */}
-              <div className="bg-blue-900/30 p-4 rounded-lg border border-blue-400/50">
-                <h2 className="text-lg font-semibold text-blue-200 mb-2">Financial Analysis Summary</h2>
-                <p className="text-gray-300">
-                  Based on your financial history, we have identified {suggestions.length} actionable 
-                  opportunities for financial optimization and wealth-building.
-                </p>
-              </div>
-
-              {/* Suggestions List */}
-              <div className="space-y-4">
-                {suggestions.map((suggestion) => {
-                  const IconComponent = suggestion.icon;
-                  return (
-                    <div
-                      key={suggestion.id}
-                      className={`border rounded-lg p-4 ${priorityColors[suggestion.priority]}`}
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="p-2 rounded-full bg-white/10">
-                          <IconComponent className="w-5 h-5" />
+            {/* Suggestions List */}
+            <div className="space-y-4">
+              {suggestions.map((suggestion) => {
+                const IconComponent = suggestion.icon;
+                return (
+                  <div
+                    key={suggestion.id}
+                    className={`border rounded-lg p-4 ${priorityColors[suggestion.priority]}`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-2 rounded-full bg-white/10">
+                        <IconComponent className="w-5 h-5" />
+                      </div>
+                      
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-semibold">{suggestion.title}</h3>
+                          <span className="text-xs px-2 py-1 rounded-full bg-white/10">
+                            {suggestion.priority.toUpperCase()}
+                          </span>
                         </div>
                         
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold">{suggestion.title}</h3>
-                            <span className="text-xs px-2 py-1 rounded-full bg-white/10">
-                              {suggestion.priority.toUpperCase()}
-                            </span>
+                        <p className="mb-3 text-gray-300">{suggestion.description}</p>
+                        
+                        {suggestion.actionItems && suggestion.actionItems.length > 0 && (
+                          <div className="mb-3">
+                            <h4 className="text-sm font-semibold text-blue-300 mb-1">Action Items:</h4>
+                            <ul className="list-disc pl-5 text-gray-300 text-sm">
+                              {suggestion.actionItems.map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
                           </div>
-                          
-                          <p className="mb-3 text-gray-300">{suggestion.description}</p>
-                          
-                          {suggestion.actionItems && suggestion.actionItems.length > 0 && (
-                            <div className="mb-3">
-                              <h4 className="text-sm font-semibold text-blue-300 mb-1">Action Items:</h4>
-                              <ul className="list-disc pl-5 text-gray-300 text-sm">
-                                {suggestion.actionItems.map((item, index) => (
-                                  <li key={index}>{item}</li>
-                                ))}
-                              </ul>
+                        )}
+                        
+                        <div className="flex flex-wrap gap-4 text-sm text-gray-300">
+                          {suggestion.potentialSavings && (
+                            <div className="flex items-center gap-1">
+                              <DollarSign className="w-4 h-4" />
+                              Potential Impact: ${suggestion.potentialSavings.toLocaleString()}
                             </div>
                           )}
-                          
-                          <div className="flex flex-wrap gap-4 text-sm text-gray-300">
-                            {suggestion.potentialSavings && (
-                              <div className="flex items-center gap-1">
-                                <DollarSign className="w-4 h-4" />
-                                Potential Impact: ${suggestion.potentialSavings.toLocaleString()}
-                              </div>
-                            )}
-                            {suggestion.deadline && (
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4" />
-                                Target Date: {suggestion.deadline}
-                              </div>
-                            )}
+                          {suggestion.deadline && (
                             <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4" />
-                              Updated: Just now
+                              <Calendar className="w-4 h-4" />
+                              Target Date: {suggestion.deadline}
                             </div>
+                          )}
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            Updated: Just now
                           </div>
                         </div>
-
-                        <button className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition-colors">
-                          Take Action
-                          <ArrowRight className="w-4 h-4" />
-                        </button>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
 
-              {/* Learning Resources */}
-              <div className="border-t border-blue-800/50 pt-6">
-                <h2 className="text-lg font-semibold mb-3">Related Resources</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <a href="#" className="block p-4 bg-white/10 border border-blue-800/50 rounded-lg hover:bg-white/20 transition-colors">
-                    <h3 className="text-blue-400 font-semibold mb-1">Emergency Fund Basics</h3>
-                    <p className="text-gray-300">Learn why emergency funds are crucial and how to build one efficiently.</p>
-                  </a>
-                  <a href="#" className="block p-4 bg-white/10 border border-blue-800/50 rounded-lg hover:bg-white/20 transition-colors">
-                    <h3 className="text-blue-400 font-semibold mb-1">Investment Strategies for Beginners</h3>
-                    <p className="text-gray-300">Simple approaches to building a diversified investment portfolio.</p>
-                  </a>
-                </div>
-              </div>
-              
-              <div className="bg-blue-900/30 p-4 rounded-lg border border-blue-400/50 flex items-start gap-2">
-                <AlertTriangle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                <p className="text-gray-300">
-                  These suggestions are generated based on your financial history and current best practices. 
-                  For personalized advice, consider consulting with a certified financial advisor.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Chat Section */}
-        <div className="lg:w-96 flex flex-col h-full">
-          <div className="bg-white/10 backdrop-blur-lg rounded-lg border border-blue-800/50 overflow-hidden flex flex-col h-[calc(100vh-10rem)]">
-            <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-4">
-              <div className="flex items-center gap-2 font-bold">
-                <Bot className="w-5 h-5" />
-                Financial Assistant
-              </div>
-              <p className="text-blue-200 text-sm">Get answers to your financial questions</p>
-            </div>
-
-            <div 
-              ref={chatContainerRef}
-              className="flex-1 overflow-y-auto p-4 space-y-4"
-            >
-              {chatMessages.map((message) => (
-                <div 
-                  key={message.id} 
-                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div 
-                    className={`max-w-xs rounded-lg px-3 py-2 ${
-                      message.sender === 'user' 
-                        ? 'bg-blue-600 text-white rounded-tr-none' 
-                        : 'bg-blue-900/50 border border-blue-800 text-blue-100 rounded-tl-none'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 mb-1">
-                      {message.sender === 'user' ? (
-                        <User className="w-4 h-4" />
-                      ) : (
-                        <Bot className="w-4 h-4" />
-                      )}
-                      <span className="text-xs font-semibold">
-                        {message.sender === 'user' ? 'You' : 'MOON.ai'}
-                      </span>
-                    </div>
-                    <p>{message.text}</p>
-                  </div>
-                </div>
-              ))}
-              {isSending && (
-                <div className="flex justify-start">
-                  <div className="max-w-xs rounded-lg px-3 py-2 bg-blue-900/50 border border-blue-800 text-blue-100 rounded-tl-none">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Bot className="w-4 h-4" />
-                      <span className="text-xs font-semibold">MOON.ai</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-150"></div>
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-300"></div>
+                      <button className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm transition-colors">
+                        Take Action
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              })}
             </div>
 
-            <div className="p-4 border-t border-blue-800/50 bg-blue-950/50">
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Type your question..."
-                  className="flex-1 bg-blue-900/30 text-white placeholder-blue-300/50 border border-blue-800/50 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={isSending}
-                />
-                <button
-                  onClick={handleSendMessage}
-                  disabled={isSending || inputMessage.trim() === ''}
-                  className={`p-2 ${isSending ? 'bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'} rounded-lg transition-colors`}
-                >
-                  {isSending ? <Loader className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
-                </button>
+            {/* Learning Resources */}
+            <div className="border-t border-blue-800/50 pt-6">
+              <h2 className="text-lg font-semibold mb-3">Related Resources</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <a href="#" className="block p-4 bg-white/10 border border-blue-800/50 rounded-lg hover:bg-white/20 transition-colors">
+                  <h3 className="text-blue-400 font-semibold mb-1">Emergency Fund Basics</h3>
+                  <p className="text-gray-300">Learn why emergency funds are crucial and how to build one efficiently.</p>
+                </a>
+                <a href="#" className="block p-4 bg-white/10 border border-blue-800/50 rounded-lg hover:bg-white/20 transition-colors">
+                  <h3 className="text-blue-400 font-semibold mb-1">Investment Strategies for Beginners</h3>
+                  <p className="text-gray-300">Simple approaches to building a diversified investment portfolio.</p>
+                </a>
               </div>
-              <div className="text-blue-400/70 text-xs mt-2">
-                Ask about financial goals, investment strategies, or clarification on recommendations
-              </div>
+            </div>
+            
+            <div className="bg-blue-900/30 p-4 rounded-lg border border-blue-400/50 flex items-start gap-2">
+              <AlertTriangle className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+              <p className="text-gray-300">
+                These suggestions are generated based on your financial history and current best practices. 
+                For personalized advice, consider consulting with a certified financial advisor.
+              </p>
             </div>
           </div>
         </div>

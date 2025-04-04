@@ -2,10 +2,6 @@
   "version": 3,
   "sources": [],
   "sections": [
-<<<<<<< Updated upstream
-    {"offset": {"line": 12, "column": 0}, "map": {"version":3,"sources":["file:///mnt/c/D/ethbuch/planner/FinancialPlanner/src/app/favicon.ico.mjs%20%28structured%20image%20object%29"],"sourcesContent":["import src from \"IMAGE\";\nexport default { src, width: 512, height: 512 }\n"],"names":[],"mappings":";;;AAAA;;uCACe;IAAE,KAAA,kHAAA,CAAA,UAAG;IAAE,OAAO;IAAK,QAAQ;AAAI"}},
-=======
-    {"offset": {"line": 12, "column": 0}, "map": {"version":3,"sources":["file:///Users/linumlabs/Desktop/FinancialPlanner/FinancialPlanner/src/app/favicon.ico.mjs%20%28structured%20image%20object%29"],"sourcesContent":["import src from \"IMAGE\";\nexport default { src, width: 256, height: 256 }\n"],"names":[],"mappings":";;;AAAA;;uCACe;IAAE,KAAA,kHAAA,CAAA,UAAG;IAAE,OAAO;IAAK,QAAQ;AAAI"}},
->>>>>>> Stashed changes
+    {"offset": {"line": 12, "column": 0}, "map": {"version":3,"sources":["file:///Users/linumlabs/Desktop/FinancialPlanner/FinancialPlanner/src/app/favicon.ico.mjs%20%28structured%20image%20object%29"],"sourcesContent":["import src from \"IMAGE\";\nexport default { src, width: 512, height: 512 }\n"],"names":[],"mappings":";;;AAAA;;uCACe;IAAE,KAAA,kHAAA,CAAA,UAAG;IAAE,OAAO;IAAK,QAAQ;AAAI"}},
     {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"A"}}]
 }

@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="shortcut icon" href='./rocket.png' />
+        <link rel="shortcut icon" href='./moon.png' />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

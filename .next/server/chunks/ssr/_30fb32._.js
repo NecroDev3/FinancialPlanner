@@ -46,7 +46,7 @@ const Suggestions = ()=>{
     const [isSending, setIsSending] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isDemo, setIsDemo] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const chatContainerRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useRef"])(null);
-    const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
+    const API_KEY = ("TURBOPACK compile-time value", "hackathon-9f72a4cd-b6c8-4f87-a5e2-abcdef123456");
     const priorityColors = {
         urgent: 'bg-blue-900/30 border-blue-400/50 text-blue-200',
         high: 'bg-blue-900/30 border-blue-400/50 text-blue-200',
@@ -158,7 +158,7 @@ const Suggestions = ()=>{
             }
             console.log(`Fetching data for wallet: ${walletAddress}`);
             try {
-                const response = await fetch(`https://localhost5000/agent/analyze/${walletAddress}`);
+                const response = await fetch(`https://localhost:5000/agent/analyze/${walletAddress}`);
                 if (!response.ok) {
                     throw new Error(`API error: ${response.status} ${response.statusText}`);
                 }

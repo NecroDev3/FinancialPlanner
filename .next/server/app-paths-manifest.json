@@ -1,13 +1,9 @@
 {
-  "/home/page": "app/home/page.js",
-  "/_not-found/page": "app/_not-found/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-<<<<<<< Updated upstream
-  "/_not-found/page": "app/_not-found/page.js"
-=======
   "/page": "app/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
   "/monitor/page": "app/monitor/page.js",
   "/results/page": "app/results/page.js",
-  "/suggestions/page": "app/suggestions/page.js"
->>>>>>> Stashed changes
+  "/suggestions/page": "app/suggestions/page.js",
+  "/home/page": "app/home/page.js"
 }

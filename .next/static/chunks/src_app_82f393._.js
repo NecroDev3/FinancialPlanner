@@ -413,31 +413,71 @@ const Monitor = ()=>{
                 allocationMethod: document.getElementById('allocationMethod')?.value
             };
             console.log('Submitting analysis:', analysisData);
-            // Check if we need to deploy an agent first
-            if (agentName === '') {
-                console.log('No agent found, deploying new agent...');
-                // Create a name for the agent
-                const agentNameToUse = `FinAdvisor_${walletAddress.slice(0, 6)}`;
+            // Always deploy a new agent for testing purposes
+            console.log('Deploying new agent for testing...');
+            // Create a name for the agent with a timestamp to ensure uniqueness
+            const timestamp = new Date().getTime().toString().slice(-6);
+            const agentNameToUse = `FinAdvisor_${walletAddress.slice(0, 6)}_${timestamp}`;
+            try {
                 // Deploy agent
                 const deployResponse = await fetch(`https://localhost5000/agent/deploy/${walletAddress}/${agentNameToUse}`);
                 const deployData = await deployResponse.json();
                 if (deployData.result === 'ok') {
                     console.log('Agent deployed successfully:', deployData.name);
                     setAgentName(deployData.name);
+                    // Store agent info in localStorage to access on results page
+                    localStorage.setItem('currentAgentName', deployData.name);
+                    localStorage.setItem('analysisData', JSON.stringify(analysisData));
+                    localStorage.setItem('suggestions', JSON.stringify([
+                        {
+                            title: "Diversify Portfolio",
+                            description: "Your portfolio is heavily concentrated in tech stocks. Consider adding exposure to other sectors.",
+                            actionItems: [
+                                "Research ETFs for different sectors",
+                                "Allocate 20% to defensive sectors"
+                            ]
+                        },
+                        {
+                            title: "Rebalance Monthly",
+                            description: "Market volatility has shifted your allocations. Consider monthly rebalancing.",
+                            actionItems: [
+                                "Set up automatic rebalancing",
+                                "Review allocation targets quarterly"
+                            ]
+                        },
+                        {
+                            title: "Optimize Tax Efficiency",
+                            description: "Place high-yield investments in tax-advantaged accounts to minimize tax burden.",
+                            actionItems: [
+                                "Move dividend stocks to IRA",
+                                "Consider tax-loss harvesting"
+                            ]
+                        }
+                    ]));
                     // Wait a moment for the agent to be fully deployed
                     await new Promise((resolve)=>setTimeout(resolve, 2000));
+                    // Navigate to results
+                    window.location.href = '/results';
                 } else {
                     throw new Error(deployData.error || 'Failed to deploy agent');
                 }
+            } catch (error) {
+                console.error('Error during agent deployment:', error);
+                // Wait 2 seconds even in error case
+                await new Promise((resolve)=>setTimeout(resolve, 2000));
+                // Even if there's an error, still navigate to results page for testing
+                window.location.href = '/results';
             }
-            // Navigate to results
-            window.location.href = '/insights';
         } catch (error) {
             console.error(error);
             setErrors((prev)=>({
                     ...prev,
                     submit: error instanceof Error ? error.message : 'Failed to submit analysis'
                 }));
+            // Wait 2 seconds
+            await new Promise((resolve)=>setTimeout(resolve, 2000));
+            // Even if there's a validation error, navigate to results page for testing
+            window.location.href = '/results';
         } finally{
             setIsSubmitting(false);
         }
@@ -455,7 +495,7 @@ const Monitor = ()=>{
                                 className: "w-8 h-8 text-white"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/monitor/page.tsx",
-                                lineNumber: 426,
+                                lineNumber: 461,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -463,13 +503,13 @@ const Monitor = ()=>{
                                 children: "MOON.ai"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/monitor/page.tsx",
-                                lineNumber: 427,
+                                lineNumber: 462,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/monitor/page.tsx",
-                        lineNumber: 425,
+                        lineNumber: 460,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
@@ -481,7 +521,7 @@ const Monitor = ()=>{
                                 children: "Moon"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/monitor/page.tsx",
-                                lineNumber: 430,
+                                lineNumber: 465,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -490,7 +530,7 @@ const Monitor = ()=>{
                                 children: "About"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/monitor/page.tsx",
-                                lineNumber: 431,
+                                lineNumber: 466,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -499,19 +539,19 @@ const Monitor = ()=>{
                                 children: "Features"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/monitor/page.tsx",
-                                lineNumber: 432,
+                                lineNumber: 467,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/monitor/page.tsx",
-                        lineNumber: 429,
+                        lineNumber: 464,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/monitor/page.tsx",
-                lineNumber: 424,
+                lineNumber: 459,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -529,14 +569,14 @@ const Monitor = ()=>{
                                             className: "w-6 h-6"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 440,
+                                            lineNumber: 475,
                                             columnNumber: 15
                                         }, this),
                                         "Investment Portfolio Analysis"
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                    lineNumber: 439,
+                                    lineNumber: 474,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -544,13 +584,13 @@ const Monitor = ()=>{
                                     children: "Get personalized insights for your investment strategy"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                    lineNumber: 443,
+                                    lineNumber: 478,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/monitor/page.tsx",
-                            lineNumber: 438,
+                            lineNumber: 473,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -563,7 +603,7 @@ const Monitor = ()=>{
                                             children: "Wallet Address"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 448,
+                                            lineNumber: 483,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -577,7 +617,7 @@ const Monitor = ()=>{
                                                     className: `flex-1 p-3 rounded-lg bg-white/5 border ${errors.walletAddress ? 'border-red-500' : 'border-blue-800/50'} text-white placeholder:text-gray-400`
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                    lineNumber: 450,
+                                                    lineNumber: 485,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -593,12 +633,12 @@ const Monitor = ()=>{
                                                                     children: network.name
                                                                 }, network.id, false, {
                                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                                    lineNumber: 467,
+                                                                    lineNumber: 502,
                                                                     columnNumber: 23
                                                                 }, this))
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 458,
+                                                            lineNumber: 493,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -611,14 +651,14 @@ const Monitor = ()=>{
                                                                         className: "w-5 h-5"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/monitor/page.tsx",
-                                                                        lineNumber: 479,
+                                                                        lineNumber: 514,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     "Disconnect"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/monitor/page.tsx",
-                                                                lineNumber: 475,
+                                                                lineNumber: 510,
                                                                 columnNumber: 23
                                                             }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                                                 children: [
@@ -636,20 +676,20 @@ const Monitor = ()=>{
                                                                                             className: "w-6 h-6"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                                                            lineNumber: 488,
+                                                                                            lineNumber: 523,
                                                                                             columnNumber: 31
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                             children: "Base Wallet"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                                                            lineNumber: 493,
+                                                                                            lineNumber: 528,
                                                                                             columnNumber: 31
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                                                    lineNumber: 487,
+                                                                                    lineNumber: 522,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$coinbase$2f$onchainkit$2f$esm$2f$wallet$2f$components$2f$WalletDropdown$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["WalletDropdown"], {
@@ -658,44 +698,44 @@ const Monitor = ()=>{
                                                                                         children: [
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$coinbase$2f$onchainkit$2f$esm$2f$wallet$2f$components$2f$WalletAdvancedAddressDetails$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["WalletAdvancedAddressDetails"], {}, void 0, false, {
                                                                                                 fileName: "[project]/src/app/monitor/page.tsx",
-                                                                                                lineNumber: 497,
+                                                                                                lineNumber: 532,
                                                                                                 columnNumber: 33
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$coinbase$2f$onchainkit$2f$esm$2f$wallet$2f$components$2f$WalletAdvancedWalletActions$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["WalletAdvancedWalletActions"], {}, void 0, false, {
                                                                                                 fileName: "[project]/src/app/monitor/page.tsx",
-                                                                                                lineNumber: 498,
+                                                                                                lineNumber: 533,
                                                                                                 columnNumber: 33
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$coinbase$2f$onchainkit$2f$esm$2f$wallet$2f$components$2f$WalletAdvancedTransactionActions$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["WalletAdvancedTransactionActions"], {}, void 0, false, {
                                                                                                 fileName: "[project]/src/app/monitor/page.tsx",
-                                                                                                lineNumber: 499,
+                                                                                                lineNumber: 534,
                                                                                                 columnNumber: 33
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$coinbase$2f$onchainkit$2f$esm$2f$wallet$2f$components$2f$WalletAdvancedTokenHoldings$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["WalletAdvancedTokenHoldings"], {}, void 0, false, {
                                                                                                 fileName: "[project]/src/app/monitor/page.tsx",
-                                                                                                lineNumber: 500,
+                                                                                                lineNumber: 535,
                                                                                                 columnNumber: 33
                                                                                             }, this)
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/src/app/monitor/page.tsx",
-                                                                                        lineNumber: 496,
+                                                                                        lineNumber: 531,
                                                                                         columnNumber: 31
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                                                    lineNumber: 495,
+                                                                                    lineNumber: 530,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                                            lineNumber: 486,
+                                                                            lineNumber: 521,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/monitor/page.tsx",
-                                                                        lineNumber: 485,
+                                                                        lineNumber: 520,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     providers.length > 0 ? providers?.map((provider)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -709,46 +749,46 @@ const Monitor = ()=>{
                                                                                     className: "w-6 h-6"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                                                    lineNumber: 514,
+                                                                                    lineNumber: 549,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                                     children: "Connect"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                                                    lineNumber: 515,
+                                                                                    lineNumber: 550,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, provider.info.uuid, true, {
                                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                                            lineNumber: 508,
+                                                                            lineNumber: 543,
                                                                             columnNumber: 27
                                                                         }, this)) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                                         className: "text-blue-500",
                                                                         children: "No Announced Wallet Providers"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/monitor/page.tsx",
-                                                                        lineNumber: 518,
+                                                                        lineNumber: 553,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true)
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 473,
+                                                            lineNumber: 508,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                    lineNumber: 457,
+                                                    lineNumber: 492,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 449,
+                                            lineNumber: 484,
                                             columnNumber: 15
                                         }, this),
                                         errors.walletAddress && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -756,7 +796,7 @@ const Monitor = ()=>{
                                             children: errors.walletAddress
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 528,
+                                            lineNumber: 563,
                                             columnNumber: 17
                                         }, this),
                                         errors.network && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -764,7 +804,7 @@ const Monitor = ()=>{
                                             children: errors.network
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 531,
+                                            lineNumber: 566,
                                             columnNumber: 17
                                         }, this),
                                         currentChainId && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -778,13 +818,13 @@ const Monitor = ()=>{
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 534,
+                                            lineNumber: 569,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                    lineNumber: 447,
+                                    lineNumber: 482,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -798,7 +838,7 @@ const Monitor = ()=>{
                                                     children: "Time Period"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                    lineNumber: 544,
+                                                    lineNumber: 579,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -811,7 +851,7 @@ const Monitor = ()=>{
                                                             children: "Past Year"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 550,
+                                                            lineNumber: 585,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -819,7 +859,7 @@ const Monitor = ()=>{
                                                             children: "Past Quarter"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 551,
+                                                            lineNumber: 586,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -827,7 +867,7 @@ const Monitor = ()=>{
                                                             children: "Past Month"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 552,
+                                                            lineNumber: 587,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -835,19 +875,19 @@ const Monitor = ()=>{
                                                             children: "Custom Range"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 553,
+                                                            lineNumber: 588,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                    lineNumber: 545,
+                                                    lineNumber: 580,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 543,
+                                            lineNumber: 578,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -858,7 +898,7 @@ const Monitor = ()=>{
                                                     children: "Analysis Type"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                    lineNumber: 558,
+                                                    lineNumber: 593,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -874,14 +914,14 @@ const Monitor = ()=>{
                                                                     defaultChecked: true
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                                    lineNumber: 561,
+                                                                    lineNumber: 596,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 "Portfolio Analysis"
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 560,
+                                                            lineNumber: 595,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -894,14 +934,14 @@ const Monitor = ()=>{
                                                                     defaultChecked: true
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                                    lineNumber: 565,
+                                                                    lineNumber: 600,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 "Risk Assessment"
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 564,
+                                                            lineNumber: 599,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -914,26 +954,26 @@ const Monitor = ()=>{
                                                                     defaultChecked: true
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                                    lineNumber: 569,
+                                                                    lineNumber: 604,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 "Investment Yield"
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 568,
+                                                            lineNumber: 603,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                    lineNumber: 559,
+                                                    lineNumber: 594,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 557,
+                                            lineNumber: 592,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -944,7 +984,7 @@ const Monitor = ()=>{
                                                     children: "Investment Strategy"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                    lineNumber: 576,
+                                                    lineNumber: 611,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -956,7 +996,7 @@ const Monitor = ()=>{
                                                             children: "Growth Investing"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 578,
+                                                            lineNumber: 613,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -964,7 +1004,7 @@ const Monitor = ()=>{
                                                             children: "Value Investing"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 579,
+                                                            lineNumber: 614,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -972,7 +1012,7 @@ const Monitor = ()=>{
                                                             children: "Income Generation"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 580,
+                                                            lineNumber: 615,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -980,13 +1020,13 @@ const Monitor = ()=>{
                                                             children: "Balanced Approach"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 581,
+                                                            lineNumber: 616,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                    lineNumber: 577,
+                                                    lineNumber: 612,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -994,7 +1034,7 @@ const Monitor = ()=>{
                                                     children: "Allocation Method"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                    lineNumber: 584,
+                                                    lineNumber: 619,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -1006,7 +1046,7 @@ const Monitor = ()=>{
                                                             children: "Modern Portfolio Theory"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 586,
+                                                            lineNumber: 621,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -1014,7 +1054,7 @@ const Monitor = ()=>{
                                                             children: "Strategic Asset Allocation"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 587,
+                                                            lineNumber: 622,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -1022,7 +1062,7 @@ const Monitor = ()=>{
                                                             children: "Tactical Asset Allocation"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 588,
+                                                            lineNumber: 623,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -1030,25 +1070,25 @@ const Monitor = ()=>{
                                                             children: "Risk Parity"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                                            lineNumber: 589,
+                                                            lineNumber: 624,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                                    lineNumber: 585,
+                                                    lineNumber: 620,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 575,
+                                            lineNumber: 610,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                    lineNumber: 542,
+                                    lineNumber: 577,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1058,7 +1098,7 @@ const Monitor = ()=>{
                                             className: "w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 595,
+                                            lineNumber: 630,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1066,7 +1106,7 @@ const Monitor = ()=>{
                                             children: "This tool provides personalized investment insights for informational purposes only. Please consult with a qualified financial advisor for professional investment advice. Your data is processed securely and never stored on our servers."
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 596,
+                                            lineNumber: 631,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1079,55 +1119,55 @@ const Monitor = ()=>{
                                                         className: "w-5 h-5 animate-spin"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/monitor/page.tsx",
-                                                        lineNumber: 608,
+                                                        lineNumber: 643,
                                                         columnNumber: 21
                                                     }, this),
                                                     "Processing..."
                                                 ]
                                             }, void 0, true) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                                 children: [
-                                                    agentName === '' ? "Create Financial Plan" : "View " + agentName + " Insights",
+                                                    "Deploy Test Agent",
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$arrow$2d$right$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__ArrowRight$3e$__["ArrowRight"], {
                                                         className: "w-5 h-5"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/monitor/page.tsx",
-                                                        lineNumber: 614,
+                                                        lineNumber: 649,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/monitor/page.tsx",
-                                            lineNumber: 601,
+                                            lineNumber: 636,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/monitor/page.tsx",
-                                    lineNumber: 594,
+                                    lineNumber: 629,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/monitor/page.tsx",
-                            lineNumber: 446,
+                            lineNumber: 481,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/monitor/page.tsx",
-                    lineNumber: 437,
+                    lineNumber: 472,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/monitor/page.tsx",
-                lineNumber: 436,
+                lineNumber: 471,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/monitor/page.tsx",
-        lineNumber: 423,
+        lineNumber: 458,
         columnNumber: 5
     }, this);
 };

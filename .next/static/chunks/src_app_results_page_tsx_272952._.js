@@ -33,7 +33,7 @@ var _s = __turbopack_refresh__.signature();
 ;
 ;
 ;
-const InsightsPage = ()=>{
+const Results = ()=>{
     _s();
     const [activeTab, setActiveTab] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('summary');
     const [timeFilter, setTimeFilter] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])('yearly');
@@ -212,9 +212,9 @@ const InsightsPage = ()=>{
     };
     // Fetch data from API
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "InsightsPage.useEffect": ()=>{
+        "Results.useEffect": ()=>{
             const fetchAnalysisData = {
-                "InsightsPage.useEffect.fetchAnalysisData": async ()=>{
+                "Results.useEffect.fetchAnalysisData": async ()=>{
                     setLoading(true);
                     try {
                         // Get the account ID from localStorage
@@ -251,10 +251,10 @@ const InsightsPage = ()=>{
                         setLoading(false);
                     }
                 }
-            }["InsightsPage.useEffect.fetchAnalysisData"];
+            }["Results.useEffect.fetchAnalysisData"];
             fetchAnalysisData();
         }
-    }["InsightsPage.useEffect"], []);
+    }["Results.useEffect"], []);
     // Calculate financial totals
     const calculateTotals = ()=>{
         if (!analysisData || !analysisData.analysis || !analysisData.analysis.financialEvents) {
@@ -558,18 +558,18 @@ const InsightsPage = ()=>{
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                href: "/insights",
+                                href: "/results",
                                 className: "hover:text-blue-300 transition-colors",
-                                children: "Insights"
+                                children: "Results"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/results/page.tsx",
                                 lineNumber: 425,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                href: "/goals",
+                                href: "/suggestions",
                                 className: "hover:text-blue-300 transition-colors",
-                                children: "Goals"
+                                children: "Suggestions"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/results/page.tsx",
                                 lineNumber: 426,
@@ -901,16 +901,16 @@ const InsightsPage = ()=>{
                                                     className: "bg-white/5 border border-blue-800/50 rounded-lg px-3 py-2 text-white",
                                                     children: [
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                            value: "yearly",
-                                                            children: "Annual View"
+                                                            value: "monthly",
+                                                            children: "Monthly View"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/results/page.tsx",
                                                             lineNumber: 498,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
-                                                            value: "monthly",
-                                                            children: "Monthly View"
+                                                            value: "yearly",
+                                                            children: "Annual View"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/results/page.tsx",
                                                             lineNumber: 499,
@@ -1490,11 +1490,11 @@ const InsightsPage = ()=>{
         columnNumber: 5
     }, this);
 };
-_s(InsightsPage, "bY6wk/Ry/Ltgg4onbgnuLVwunXU=");
-_c = InsightsPage;
-const __TURBOPACK__default__export__ = InsightsPage;
+_s(Results, "bY6wk/Ry/Ltgg4onbgnuLVwunXU=");
+_c = Results;
+const __TURBOPACK__default__export__ = Results;
 var _c;
-__turbopack_refresh__.register(_c, "InsightsPage");
+__turbopack_refresh__.register(_c, "Results");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_refresh__.registerExports(module, globalThis.$RefreshHelpers$);
 }
