@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 
 export default function UserInputComponent() {
   const [inputValue, setInputValue] = useState('');
@@ -65,6 +66,17 @@ export default function UserInputComponent() {
   
   return (
     <div className="w-full max-w-2xl mx-auto mt-8 mb-12">
+      <div className="flex items-center gap-3 mb-6">
+            <h1 className="text-lg font-semibold text-white">
+            AI Chat powered by Token Metrics AI
+            </h1>
+            <Image
+            src="/token_metrics.svg" // Ensure your logo is in /public/logo.svg
+            alt="Token Metrics AI Logo"
+            width={40}
+            height={40}
+            />
+      </div>
       <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
         <input
           type="text"
