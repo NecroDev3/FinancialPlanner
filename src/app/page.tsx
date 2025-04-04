@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Wallet, Calculator, Moon } from 'lucide-react';
+import UserInputComponent from './components/UserInputComponent'; // Adjust the path as needed
 
 export default function Home() {
   return (
@@ -45,6 +46,10 @@ export default function Home() {
               Navigate your financial journey with confidence using our AI-powered analysis and personalized recommendations.
             </p>
           </div>
+
+          {/* User Input Component - Added here */}
+          <UserInputComponent />
+
           <div className="grid sm:grid-cols-3 gap-8 w-full max-w-4xl">
             <div className="bg-white/10 backdrop-blur-lg rounded-lg p-6 text-center">
               <Wallet className="w-8 h-8 text-blue-400 mx-auto mb-4" />
@@ -64,7 +69,7 @@ export default function Home() {
           </div>
           <div className="flex gap-4 mt-8">
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-semibold transition-colors">
-              <Link href="/monitor" className="hover:text-blue-300 transition-colors">Get Started</Link>
+              <Link href="/dashboard" className="hover:text-blue-300 transition-colors">Get Started</Link>
             </button>
             <Link href="/features" className="border border-blue-600 hover:bg-blue-600/10 px-8 py-3 rounded-full font-semibold transition-colors">
               Learn More
