@@ -1,12 +1,22 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Wallet, ArrowRight, Clock, AlertCircle, Moon, LogOut } from 'lucide-react';
+import { ArrowRight, Clock, AlertCircle, Moon, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useSyncProviders } from "../hooks/useSyncProviders";
+import {
+  ConnectWallet,
+  Wallet as BaseWallet,
+  WalletDropdown,
+  WalletAdvancedAddressDetails,
+  WalletAdvancedTokenHoldings,
+  WalletAdvancedTransactionActions,
+  WalletAdvancedWalletActions,
+} from '@coinbase/onchainkit/wallet';
+import { Avatar, Name } from '@coinbase/onchainkit/identity';
+import { Wallet } from 'lucide-react';
 
 // Types
-/* eslint-disable */
 interface ValidationErrors {
   walletAddress?: string;
   timeframe?: string;
@@ -26,6 +36,15 @@ interface WalletPermission {
   caveats: unknown[];
 }
 
+interface EIP6963ProviderDetail {
+  info: {
+    uuid: string;
+    name: string;
+    icon: string;
+  };
+  provider: any;
+}
+
 const SUPPORTED_NETWORKS: NetworkOption[] = [
   { id: 'eth', name: 'Ethereum', chainId: 1 },
   { id: 'base', name: 'Base', chainId: 8453 },
@@ -34,17 +53,47 @@ const SUPPORTED_NETWORKS: NetworkOption[] = [
 
 const Monitor = () => {
   // State management
-  const [, setHasPermissions] = useState(false);
+  const [hasPermissions, setHasPermissions] = useState(false);
   const [walletAddress, setWalletAddress] = useState('');
   const [selectedTimeframe, setSelectedTimeframe] = useState('year');
   const [selectedNetwork, setSelectedNetwork] = useState<string>('eth');
   const [currentChainId, setCurrentChainId] = useState<string | null>(null);
   const [selectedWallet, setSelectedWallet] = useState<EIP6963ProviderDetail>();
-  const [, setUserAccount] = useState<string>('');
+  const [userAccount, setUserAccount] = useState<string>('');
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const providers = useSyncProviders();
   const [agentName, setAgentName] = useState('');
+  
+  // Base Wallet Connect integration
+  const [baseWalletConnected, setBaseWalletConnected] = useState(false);
+  
+  // Handle Base wallet connection
+  const handleBaseWalletConnection = (address: string) => {
+    if (address) {
+      setWalletAddress(address);
+      setUserAccount(address);
+      setBaseWalletConnected(true);
+      
+      // Store the wallet address in localStorage
+      localStorage.setItem('walletAddress', address);
+      
+      // Check if user has an agent
+      fetch('https://localhost5000/agent/has_agent/' + address)
+        .then(response => response.json())
+        .then(data => {
+          if (data.result === 'ok') {
+            setAgentName(data.name);
+          }
+        })
+        .catch(error => console.error('Error fetching agent data:', error));
+    } else {
+      if (baseWalletConnected) {
+        handleDisconnect();
+        setBaseWalletConnected(false);
+      }
+    }
+  };
 
   useEffect(() => {
     if (selectedWallet) {
@@ -79,75 +128,85 @@ const Monitor = () => {
     }
   }, [selectedWallet]);
 
-    // Add permission management functions
-    const checkPermissions = async (provider: any): Promise<boolean> => {
-      try {
-        const permissions = await provider.request({
-          method: "wallet_getPermissions"
-        }) as WalletPermission[];
-  
-        const hasAccountPermission = permissions.some(
-          permission => permission.parentCapability === "eth_accounts"
-        );
-  
-        setHasPermissions(hasAccountPermission);
-        return hasAccountPermission;
-      } catch (error) {
-        console.error("Error checking permissions:", error);
-        return false;
+  // Add permission management functions
+  const checkPermissions = async (provider: any): Promise<boolean> => {
+    try {
+      const permissions = await provider.request({
+        method: "wallet_getPermissions"
+      }) as WalletPermission[];
+
+      const hasAccountPermission = permissions.some(
+        permission => permission.parentCapability === "eth_accounts"
+      );
+
+      setHasPermissions(hasAccountPermission);
+      return hasAccountPermission;
+    } catch (error) {
+      console.error("Error checking permissions:", error);
+      return false;
+    }
+  };
+
+  const requestPermissions = async (provider: any): Promise<boolean> => {
+    try {
+      const permissions = await provider.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }]
+      }) as WalletPermission[];
+
+      const hasAccountPermission = permissions.some(
+        permission => permission.parentCapability === "eth_accounts"
+      );
+
+      setHasPermissions(hasAccountPermission);
+      return hasAccountPermission;
+    } catch (error: any) {
+      if (error.code === 4001) {
+        setErrors(prev => ({
+          ...prev,
+          permissions: "Permissions needed to continue."
+        }));
+      } else {
+        setErrors(prev => ({
+          ...prev,
+          permissions: "Failed to request permissions"
+        }));
       }
-    };
+      return false;
+    }
+  };
+
+  const revokePermissions = async () => {
+    if (baseWalletConnected) {
+      handleDisconnect();
+      setBaseWalletConnected(false);
+      return;
+    }
+    
+    if (!selectedWallet?.provider) return;
+
+    try {
+      await selectedWallet.provider.request({
+        method: "wallet_revokePermissions",
+        params: [{ eth_accounts: {} }]
+      });
+
+      handleDisconnect();
+      console.log("Permissions revoked successfully");
+    } catch (error) {
+      console.error("Error revoking permissions:", error);
+    }
+  };
   
-    const requestPermissions = async (provider: any): Promise<boolean> => {
-      try {
-        const permissions = await provider.request({
-          method: "wallet_requestPermissions",
-          params: [{ eth_accounts: {} }]
-        }) as WalletPermission[];
-  
-        const hasAccountPermission = permissions.some(
-          permission => permission.parentCapability === "eth_accounts"
-        );
-  
-        setHasPermissions(hasAccountPermission);
-        return hasAccountPermission;
-      } catch (error: any) {
-        if (error.code === 4001) {
-          setErrors(prev => ({
-            ...prev,
-            permissions: "Permissions needed to continue."
-          }));
-        } else {
-          setErrors(prev => ({
-            ...prev,
-            permissions: "Failed to request permissions"
-          }));
-        }
-        return false;
-      }
-    };
-  
-    const revokePermissions = async () => {
-      if (!selectedWallet?.provider) return;
-  
-      try {
-        await selectedWallet.provider.request({
-          method: "wallet_revokePermissions",
-          params: [{ eth_accounts: {} }]
-        });
-  
-        // Reset states
-        setHasPermissions(false);
-        setWalletAddress('');
-        setUserAccount('');
-        setSelectedWallet(undefined);
-        setCurrentChainId(null);
-  
-        console.log("Permissions revoked successfully");
-      } catch (error) {
-        console.error("Error revoking permissions:", error);
-      }
-    };
+  const handleDisconnect = () => {
+    // Reset states
+    setHasPermissions(false);
+    setWalletAddress('');
+    setUserAccount('');
+    setSelectedWallet(undefined);
+    setCurrentChainId(null);
+    localStorage.removeItem('walletAddress');
+  };
 
   const detectCurrentChain = async (provider: any) => {
     try {
@@ -240,7 +299,6 @@ const Monitor = () => {
     }
   };
 
-
   // Update the handleConnect function
   const handleConnect = async (providerWithInfo: EIP6963ProviderDetail) => {
     try {
@@ -284,7 +342,6 @@ const Monitor = () => {
       // Store the wallet address in localStorage
       localStorage.setItem('walletAddress', address);
 
-
       setSelectedWallet(providerWithInfo);
       setUserAccount(address);
       setWalletAddress(address);
@@ -305,7 +362,6 @@ const Monitor = () => {
       }));
     }
   };
-
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -405,7 +461,7 @@ const Monitor = () => {
                     disabled={true}
                     className={`p-3 rounded-lg bg-white/5 border border-blue-800/50 text-white ${
                       !walletAddress ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                    } appearance-none`} // Add appearance-none to remove the arrow
+                    } appearance-none`}
                   >
                     {SUPPORTED_NETWORKS.map((network) => (
                       <option key={network.id} value={network.id}>
@@ -414,7 +470,7 @@ const Monitor = () => {
                     ))}
                   </select>
                   
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {walletAddress ? (
                       <button
                         onClick={revokePermissions}
@@ -424,21 +480,46 @@ const Monitor = () => {
                         Disconnect
                       </button>
                     ) : (
-                      providers.length > 0 ? providers?.map((provider: EIP6963ProviderDetail) => (
-                        <button 
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          key={provider.info.uuid} 
-                          onClick={() => handleConnect(provider)}
-                          disabled={isSubmitting}
-                        >
-                          <img src={provider.info.icon} alt={provider.info.name} className="w-6 h-6" />
-                          <span>Connect</span>
-                        </button>
-                      )) : (
-                        <div className="text-blue-500">
-                          No Announced Wallet Providers
+                      <>
+                        {/* Base Wallet Connect Component */}
+                        <div className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors">
+                          <BaseWallet onAddressChange={handleBaseWalletConnection}>
+                            <ConnectWallet className="px-6 py-3 flex items-center gap-2">
+                              <img 
+                                src="https://assets-global.website-files.com/65425b197bd85d362d28771a/65cc4ed3cc0dd5b9ad9f0205_Base-Symbol.svg" 
+                                alt="Base" 
+                                className="w-6 h-6" 
+                              />
+                              <span>Base Wallet</span>
+                            </ConnectWallet>
+                            <WalletDropdown>
+                              <div className="p-4 bg-slate-900 rounded-lg">
+                                <WalletAdvancedAddressDetails />
+                                <WalletAdvancedWalletActions />
+                                <WalletAdvancedTransactionActions />
+                                <WalletAdvancedTokenHoldings />
+                              </div>
+                            </WalletDropdown>
+                          </BaseWallet>
                         </div>
-                      )
+                        
+                        {/* Traditional EIP-6963 Wallet Connect */}
+                        {providers.length > 0 ? providers?.map((provider: EIP6963ProviderDetail) => (
+                          <button 
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            key={provider.info.uuid} 
+                            onClick={() => handleConnect(provider)}
+                            disabled={isSubmitting}
+                          >
+                            <img src={provider.info.icon} alt={provider.info.name} className="w-6 h-6" />
+                            <span>Connect</span>
+                          </button>
+                        )) : (
+                          <div className="text-blue-500">
+                            No Announced Wallet Providers
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -543,4 +624,3 @@ const Monitor = () => {
 };
 
 export default Monitor;
-/* eslint-enable */

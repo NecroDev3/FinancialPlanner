@@ -1,8 +1,8 @@
 'use client'
 
 import { Geist, Geist_Mono } from "next/font/google";
-
 import "./globals.css";
+import Providers from "./components/providers";
 
 
 
@@ -26,6 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="shortcut icon" href='./rocket.png' />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -39,7 +40,9 @@ export default function RootLayout({
           </div>
         </nav>
         <main>
+        <Providers> 
           {children}
+          </Providers>
         </main>
       </body>
     </html>
