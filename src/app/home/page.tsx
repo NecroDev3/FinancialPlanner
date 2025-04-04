@@ -64,7 +64,7 @@ export default function Home() {
           </div>
           <div className="flex gap-4 mt-8">
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-semibold transition-colors">
-              <Link href="/dashboard" className="hover:text-blue-300 transition-colors">Get Started</Link>
+            <Link href="/monitor" className="hover:text-blue-300 transition-colors">Get Started</Link>
             </button>
             <Link href="/features" className="border border-blue-600 hover:bg-blue-600/10 px-8 py-3 rounded-full font-semibold transition-colors">
               Learn More

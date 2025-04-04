@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-const GoalsPage = () => {
+const Suggestions = () => {
   const [chatMessages, setChatMessages] = useState([
     { id: 1, sender: 'bot', text: 'Hello! I\'m your MOON.ai financial assistant. How can I help with your financial goals today?' }
   ]);
@@ -31,6 +31,8 @@ const GoalsPage = () => {
   const [isSending, setIsSending] = useState(false);
   const [isDemo, setIsDemo] = useState(false);
   const chatContainerRef = useRef(null);
+
+  const API_KEY = process.env.NEXT_PUBLIC_API_KEY;
 
   const priorityColors = {
     urgent: 'bg-blue-900/30 border-blue-400/50 text-blue-200',
@@ -118,19 +120,45 @@ const GoalsPage = () => {
     setLoading(true);
     
     try {
-      const accountId = localStorage.getItem('accountId');
+      // Try to get suggestions from localStorage first (from monitor page)
+      const storedSuggestions = localStorage.getItem('suggestions');
       
-      if (!accountId) {
-        console.log('No account ID found, using demo data');
+      if (storedSuggestions) {
+        console.log('Found suggestions in localStorage');
+        const parsedSuggestions = JSON.parse(storedSuggestions);
+        if (Array.isArray(parsedSuggestions) && parsedSuggestions.length > 0) {
+          // Transform stored suggestions to match the expected format
+          const formattedSuggestions = parsedSuggestions.map((suggestion, index) => ({
+            id: index + 1,
+            type: getTypeFromSuggestion(suggestion.title || suggestion.description),
+            title: suggestion.title || getTitleFromSuggestion(suggestion.description),
+            description: suggestion.description,
+            priority: getPriorityFromSuggestion(suggestion.description),
+            icon: getIconForSuggestion(suggestion.title || suggestion.description),
+            status: 'recommendation',
+            actionItems: suggestion.actionItems
+          }));
+          
+          console.log("Formatted suggestions from localStorage:", formattedSuggestions);
+          setSuggestions(formattedSuggestions);
+          setLoading(false);
+          return;
+        }
+      }
+      
+      const walletAddress = localStorage.getItem('walletAddress');
+      
+      if (!walletAddress) {
+        console.log('No wallet address found, using demo data');
         setSuggestions(generateDemoSuggestions());
         setIsDemo(true);
         return;
       }
       
-      console.log(`Fetching data for account: ${accountId}`);
+      console.log(`Fetching data for wallet: ${walletAddress}`);
       
       try {
-        const response = await fetch(`https://localhost:5000/agent/analyze/${accountId}`);
+        const response = await fetch(`https://localhost5000/agent/analyze/${walletAddress}`);
         
         if (!response.ok) {
           throw new Error(`API error: ${response.status} ${response.statusText}`);
@@ -216,10 +244,63 @@ const GoalsPage = () => {
     setIsSending(true);
     
     try {
-      const accountId = localStorage.getItem('accountId');
-      console.log('Account ID from localStorage:', accountId);
+      // Check if we should use Token Metrics API (if query includes crypto keywords)
+      const isCryptoQuery = messageToSend.toLowerCase().includes('crypto') || 
+                           messageToSend.toLowerCase().includes('bitcoin') || 
+                           messageToSend.toLowerCase().includes('eth') ||
+                           messageToSend.toLowerCase().includes('token') ||
+                           messageToSend.toLowerCase().includes('blockchain');
       
-      if (!accountId) {
+      if (isCryptoQuery && API_KEY) {
+        console.log('Using Token Metrics API for crypto query');
+        try {
+          const response = await fetch('https://api.tokenmetrics.com/v2/tmai', {
+            method: 'POST',
+            headers: {
+              'accept': 'application/json',
+              'api_key': API_KEY,
+              'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+              messages: [
+                {
+                  user: messageToSend
+                }
+              ]
+            })
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Token Metrics API error: ${response.status}`);
+          }
+          
+          const data = await response.json();
+          console.log('Token Metrics API Response:', data);
+          
+          // Extract the answer from the correct field in the response
+          if (data && data.success && data.answer) {
+            const botResponse = {
+              id: chatMessages.length + 2,
+              sender: 'bot',
+              text: data.answer
+            };
+            
+            setChatMessages(prev => [...prev, botResponse]);
+            setIsSending(false);
+            return;
+          } else {
+            throw new Error('Received response from Token Metrics API but could not find the answer.');
+          }
+        } catch (tokenApiError) {
+          console.error('Error with Token Metrics API:', tokenApiError);
+          // Fall back to regular processing if Token Metrics API fails
+        }
+      }
+      
+      const walletAddress = localStorage.getItem('walletAddress');
+      console.log('Wallet address from localStorage:', walletAddress);
+      
+      if (!walletAddress) {
         // Demo mode - simulate a response instead of calling the API
         await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate API delay
         
@@ -246,7 +327,7 @@ const GoalsPage = () => {
       } else {
         // Real API call
         console.log('About to call API with payload:', { query: messageToSend });
-        const response = await fetch(`https://localhost:5000/agent/chat/${accountId}`, {
+        const response = await fetch(`https://localhost5000/agent/chat/${walletAddress}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -329,8 +410,8 @@ const GoalsPage = () => {
         </div>
         <nav className="hidden sm:flex gap-8">
           <Link href="/home" className="hover:text-blue-300 transition-colors">Moon</Link>
-          <Link href="/insights" className="hover:text-blue-300 transition-colors">Insights</Link>
-          <Link href="/goals" className="hover:text-blue-300 transition-colors">Goals</Link>
+          <Link href="/results" className="hover:text-blue-300 transition-colors">Results</Link>
+          <Link href="/suggestions" className="hover:text-blue-300 transition-colors">Suggestions</Link>
         </nav>
       </header>
 
@@ -350,7 +431,7 @@ const GoalsPage = () => {
             <div className="bg-gradient-to-r from-blue-800 to-blue-900 p-6">
               <div className="flex items-center gap-2 text-xl font-bold">
                 <Lightbulb className="w-6 h-6" />
-                Financial Goals &amp; Recommendations
+                Financial Suggestions &amp; Recommendations
               </div>
               <p className="text-blue-200">Personalized suggestions based on your financial analysis</p>
             </div>
@@ -388,6 +469,17 @@ const GoalsPage = () => {
                           </div>
                           
                           <p className="mb-3 text-gray-300">{suggestion.description}</p>
+                          
+                          {suggestion.actionItems && suggestion.actionItems.length > 0 && (
+                            <div className="mb-3">
+                              <h4 className="text-sm font-semibold text-blue-300 mb-1">Action Items:</h4>
+                              <ul className="list-disc pl-5 text-gray-300 text-sm">
+                                {suggestion.actionItems.map((item, index) => (
+                                  <li key={index}>{item}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                           
                           <div className="flex flex-wrap gap-4 text-sm text-gray-300">
                             {suggestion.potentialSavings && (
@@ -444,7 +536,7 @@ const GoalsPage = () => {
             </div>
           </div>
         </div>
-
+        
         {/* Chat Section */}
         <div className="lg:w-96 flex flex-col h-full">
           <div className="bg-white/10 backdrop-blur-lg rounded-lg border border-blue-800/50 overflow-hidden flex flex-col h-[calc(100vh-10rem)]">
@@ -533,4 +625,4 @@ const GoalsPage = () => {
   );
 };
 
-export default GoalsPage;
+export default Suggestions;

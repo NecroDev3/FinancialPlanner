@@ -11,6 +11,7 @@ __turbopack_esm__({
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_import__("[project]/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_import__("[project]/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_import__("[project]/node_modules/next/dist/client/app-dir/link.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_import__("[project]/node_modules/next/dist/build/polyfills/process.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$lightbulb$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Lightbulb$3e$__ = __turbopack_import__("[project]/node_modules/lucide-react/dist/esm/icons/lightbulb.js [app-client] (ecmascript) <export default as Lightbulb>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$trending$2d$up$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__TrendingUp$3e$__ = __turbopack_import__("[project]/node_modules/lucide-react/dist/esm/icons/trending-up.js [app-client] (ecmascript) <export default as TrendingUp>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$target$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Target$3e$__ = __turbopack_import__("[project]/node_modules/lucide-react/dist/esm/icons/target.js [app-client] (ecmascript) <export default as Target>");
@@ -32,7 +33,7 @@ var _s = __turbopack_refresh__.signature();
 ;
 ;
 ;
-const GoalsPage = ()=>{
+const Suggestions = ()=>{
     _s();
     const [chatMessages, setChatMessages] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([
         {
@@ -48,6 +49,7 @@ const GoalsPage = ()=>{
     const [isSending, setIsSending] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isDemo, setIsDemo] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const chatContainerRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
+    const API_KEY = __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].env.NEXT_PUBLIC_API_KEY;
     const priorityColors = {
         urgent: 'bg-blue-900/30 border-blue-400/50 text-blue-200',
         high: 'bg-blue-900/30 border-blue-400/50 text-blue-200',
@@ -124,20 +126,45 @@ const GoalsPage = ()=>{
     };
     // Define fetchSuggestions using useCallback to maintain reference stability
     const fetchSuggestions = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useCallback"])({
-        "GoalsPage.useCallback[fetchSuggestions]": async ()=>{
+        "Suggestions.useCallback[fetchSuggestions]": async ()=>{
             console.log("Fetching financial suggestions...");
             setLoading(true);
             try {
-                const accountId = localStorage.getItem('accountId');
-                if (!accountId) {
-                    console.log('No account ID found, using demo data');
+                // Try to get suggestions from localStorage first (from monitor page)
+                const storedSuggestions = localStorage.getItem('suggestions');
+                if (storedSuggestions) {
+                    console.log('Found suggestions in localStorage');
+                    const parsedSuggestions = JSON.parse(storedSuggestions);
+                    if (Array.isArray(parsedSuggestions) && parsedSuggestions.length > 0) {
+                        // Transform stored suggestions to match the expected format
+                        const formattedSuggestions = parsedSuggestions.map({
+                            "Suggestions.useCallback[fetchSuggestions].formattedSuggestions": (suggestion, index)=>({
+                                    id: index + 1,
+                                    type: getTypeFromSuggestion(suggestion.title || suggestion.description),
+                                    title: suggestion.title || getTitleFromSuggestion(suggestion.description),
+                                    description: suggestion.description,
+                                    priority: getPriorityFromSuggestion(suggestion.description),
+                                    icon: getIconForSuggestion(suggestion.title || suggestion.description),
+                                    status: 'recommendation',
+                                    actionItems: suggestion.actionItems
+                                })
+                        }["Suggestions.useCallback[fetchSuggestions].formattedSuggestions"]);
+                        console.log("Formatted suggestions from localStorage:", formattedSuggestions);
+                        setSuggestions(formattedSuggestions);
+                        setLoading(false);
+                        return;
+                    }
+                }
+                const walletAddress = localStorage.getItem('walletAddress');
+                if (!walletAddress) {
+                    console.log('No wallet address found, using demo data');
                     setSuggestions(generateDemoSuggestions());
                     setIsDemo(true);
                     return;
                 }
-                console.log(`Fetching data for account: ${accountId}`);
+                console.log(`Fetching data for wallet: ${walletAddress}`);
                 try {
-                    const response = await fetch(`https://localhost:5000/agent/analyze/${accountId}`);
+                    const response = await fetch(`https://localhost5000/agent/analyze/${walletAddress}`);
                     if (!response.ok) {
                         throw new Error(`API error: ${response.status} ${response.statusText}`);
                     }
@@ -151,7 +178,7 @@ const GoalsPage = ()=>{
                         console.log(`Processing ${data.suggestions.length} suggestions`);
                         // Transform the suggestions into the format expected by the UI
                         const formattedSuggestions = data.suggestions.map({
-                            "GoalsPage.useCallback[fetchSuggestions].formattedSuggestions": (suggestion, index)=>({
+                            "Suggestions.useCallback[fetchSuggestions].formattedSuggestions": (suggestion, index)=>({
                                     id: index + 1,
                                     type: getTypeFromSuggestion(suggestion),
                                     title: getTitleFromSuggestion(suggestion),
@@ -160,7 +187,7 @@ const GoalsPage = ()=>{
                                     icon: getIconForSuggestion(suggestion),
                                     status: 'recommendation'
                                 })
-                        }["GoalsPage.useCallback[fetchSuggestions].formattedSuggestions"]);
+                        }["Suggestions.useCallback[fetchSuggestions].formattedSuggestions"]);
                         console.log("Formatted suggestions:", formattedSuggestions);
                         setSuggestions(formattedSuggestions);
                     } else {
@@ -183,24 +210,24 @@ const GoalsPage = ()=>{
                 setLoading(false);
             }
         }
-    }["GoalsPage.useCallback[fetchSuggestions]"], []);
+    }["Suggestions.useCallback[fetchSuggestions]"], []);
     // Run the fetch on component mount
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "GoalsPage.useEffect": ()=>{
+        "Suggestions.useEffect": ()=>{
             console.log("Component mounted, fetching suggestions");
             fetchSuggestions();
         }
-    }["GoalsPage.useEffect"], [
+    }["Suggestions.useEffect"], [
         fetchSuggestions
     ]); // Only depend on fetchSuggestions
     // Auto-scroll to bottom of chat when new messages are added
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
-        "GoalsPage.useEffect": ()=>{
+        "Suggestions.useEffect": ()=>{
             if (chatContainerRef.current) {
                 chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
             }
         }
-    }["GoalsPage.useEffect"], [
+    }["Suggestions.useEffect"], [
         chatMessages
     ]);
     const handleSendMessage = async ()=>{
@@ -224,9 +251,55 @@ const GoalsPage = ()=>{
         setInputMessage('');
         setIsSending(true);
         try {
-            const accountId = localStorage.getItem('accountId');
-            console.log('Account ID from localStorage:', accountId);
-            if (!accountId) {
+            // Check if we should use Token Metrics API (if query includes crypto keywords)
+            const isCryptoQuery = messageToSend.toLowerCase().includes('crypto') || messageToSend.toLowerCase().includes('bitcoin') || messageToSend.toLowerCase().includes('eth') || messageToSend.toLowerCase().includes('token') || messageToSend.toLowerCase().includes('blockchain');
+            if (isCryptoQuery && API_KEY) {
+                console.log('Using Token Metrics API for crypto query');
+                try {
+                    const response = await fetch('https://api.tokenmetrics.com/v2/tmai', {
+                        method: 'POST',
+                        headers: {
+                            'accept': 'application/json',
+                            'api_key': API_KEY,
+                            'content-type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            messages: [
+                                {
+                                    user: messageToSend
+                                }
+                            ]
+                        })
+                    });
+                    if (!response.ok) {
+                        throw new Error(`Token Metrics API error: ${response.status}`);
+                    }
+                    const data = await response.json();
+                    console.log('Token Metrics API Response:', data);
+                    // Extract the answer from the correct field in the response
+                    if (data && data.success && data.answer) {
+                        const botResponse = {
+                            id: chatMessages.length + 2,
+                            sender: 'bot',
+                            text: data.answer
+                        };
+                        setChatMessages((prev)=>[
+                                ...prev,
+                                botResponse
+                            ]);
+                        setIsSending(false);
+                        return;
+                    } else {
+                        throw new Error('Received response from Token Metrics API but could not find the answer.');
+                    }
+                } catch (tokenApiError) {
+                    console.error('Error with Token Metrics API:', tokenApiError);
+                // Fall back to regular processing if Token Metrics API fails
+                }
+            }
+            const walletAddress = localStorage.getItem('walletAddress');
+            console.log('Wallet address from localStorage:', walletAddress);
+            if (!walletAddress) {
                 // Demo mode - simulate a response instead of calling the API
                 await new Promise((resolve)=>setTimeout(resolve, 1500)); // Simulate API delay
                 let response;
@@ -255,7 +328,7 @@ const GoalsPage = ()=>{
                 console.log('About to call API with payload:', {
                     query: messageToSend
                 });
-                const response = await fetch(`https://localhost:5000/agent/chat/${accountId}`, {
+                const response = await fetch(`https://localhost5000/agent/chat/${walletAddress}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -314,7 +387,7 @@ const GoalsPage = ()=>{
                         className: "w-10 h-10 text-blue-500 animate-spin mb-4"
                     }, void 0, false, {
                         fileName: "[project]/src/app/suggestions/page.tsx",
-                        lineNumber: 303,
+                        lineNumber: 384,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -322,18 +395,18 @@ const GoalsPage = ()=>{
                         children: "Loading financial insights..."
                     }, void 0, false, {
                         fileName: "[project]/src/app/suggestions/page.tsx",
-                        lineNumber: 304,
+                        lineNumber: 385,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/suggestions/page.tsx",
-                lineNumber: 302,
+                lineNumber: 383,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/src/app/suggestions/page.tsx",
-            lineNumber: 301,
+            lineNumber: 382,
             columnNumber: 7
         }, this);
     }
@@ -345,7 +418,7 @@ const GoalsPage = ()=>{
                     className: "w-16 h-16 text-blue-500 mb-4"
                 }, void 0, false, {
                     fileName: "[project]/src/app/suggestions/page.tsx",
-                    lineNumber: 313,
+                    lineNumber: 394,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
@@ -353,7 +426,7 @@ const GoalsPage = ()=>{
                     children: "Error Loading Insights"
                 }, void 0, false, {
                     fileName: "[project]/src/app/suggestions/page.tsx",
-                    lineNumber: 314,
+                    lineNumber: 395,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -361,7 +434,7 @@ const GoalsPage = ()=>{
                     children: error
                 }, void 0, false, {
                     fileName: "[project]/src/app/suggestions/page.tsx",
-                    lineNumber: 315,
+                    lineNumber: 396,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -370,13 +443,13 @@ const GoalsPage = ()=>{
                     children: "Back to Dashboard"
                 }, void 0, false, {
                     fileName: "[project]/src/app/suggestions/page.tsx",
-                    lineNumber: 316,
+                    lineNumber: 397,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/src/app/suggestions/page.tsx",
-            lineNumber: 312,
+            lineNumber: 393,
             columnNumber: 7
         }, this);
     }
@@ -393,7 +466,7 @@ const GoalsPage = ()=>{
                                 className: "w-8 h-8 text-white"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                lineNumber: 327,
+                                lineNumber: 408,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -401,13 +474,13 @@ const GoalsPage = ()=>{
                                 children: "MOON.ai"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                lineNumber: 328,
+                                lineNumber: 409,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/suggestions/page.tsx",
-                        lineNumber: 326,
+                        lineNumber: 407,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("nav", {
@@ -419,37 +492,37 @@ const GoalsPage = ()=>{
                                 children: "Moon"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                lineNumber: 331,
+                                lineNumber: 412,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                href: "/insights",
+                                href: "/results",
                                 className: "hover:text-blue-300 transition-colors",
-                                children: "Insights"
+                                children: "Results"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                lineNumber: 332,
+                                lineNumber: 413,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
-                                href: "/goals",
+                                href: "/suggestions",
                                 className: "hover:text-blue-300 transition-colors",
-                                children: "Goals"
+                                children: "Suggestions"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                lineNumber: 333,
+                                lineNumber: 414,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/suggestions/page.tsx",
-                        lineNumber: 330,
+                        lineNumber: 411,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/suggestions/page.tsx",
-                lineNumber: 325,
+                lineNumber: 406,
                 columnNumber: 7
             }, this),
             isDemo && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -459,7 +532,7 @@ const GoalsPage = ()=>{
                         className: "w-5 h-5 text-blue-300"
                     }, void 0, false, {
                         fileName: "[project]/src/app/suggestions/page.tsx",
-                        lineNumber: 339,
+                        lineNumber: 420,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -472,20 +545,20 @@ const GoalsPage = ()=>{
                                 children: "Connect your accounts"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                lineNumber: 341,
+                                lineNumber: 422,
                                 columnNumber: 46
                             }, this),
                             " to see your personalized recommendations."
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/suggestions/page.tsx",
-                        lineNumber: 340,
+                        lineNumber: 421,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/suggestions/page.tsx",
-                lineNumber: 338,
+                lineNumber: 419,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -506,14 +579,14 @@ const GoalsPage = ()=>{
                                                     className: "w-6 h-6"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 352,
+                                                    lineNumber: 433,
                                                     columnNumber: 17
                                                 }, this),
-                                                "Financial Goals & Recommendations"
+                                                "Financial Suggestions & Recommendations"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                            lineNumber: 351,
+                                            lineNumber: 432,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -521,13 +594,13 @@ const GoalsPage = ()=>{
                                             children: "Personalized suggestions based on your financial analysis"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                            lineNumber: 355,
+                                            lineNumber: 436,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                    lineNumber: 350,
+                                    lineNumber: 431,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -541,7 +614,7 @@ const GoalsPage = ()=>{
                                                     children: "Financial Analysis Summary"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 361,
+                                                    lineNumber: 442,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -553,13 +626,13 @@ const GoalsPage = ()=>{
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 362,
+                                                    lineNumber: 443,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                            lineNumber: 360,
+                                            lineNumber: 441,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -577,12 +650,12 @@ const GoalsPage = ()=>{
                                                                     className: "w-5 h-5"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                    lineNumber: 379,
+                                                                    lineNumber: 460,
                                                                     columnNumber: 27
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                lineNumber: 378,
+                                                                lineNumber: 459,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -596,7 +669,7 @@ const GoalsPage = ()=>{
                                                                                 children: suggestion.title
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                                lineNumber: 384,
+                                                                                lineNumber: 465,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -604,13 +677,13 @@ const GoalsPage = ()=>{
                                                                                 children: suggestion.priority.toUpperCase()
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                                lineNumber: 385,
+                                                                                lineNumber: 466,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                        lineNumber: 383,
+                                                                        lineNumber: 464,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -618,8 +691,39 @@ const GoalsPage = ()=>{
                                                                         children: suggestion.description
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                        lineNumber: 390,
+                                                                        lineNumber: 471,
                                                                         columnNumber: 27
+                                                                    }, this),
+                                                                    suggestion.actionItems && suggestion.actionItems.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                        className: "mb-3",
+                                                                        children: [
+                                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h4", {
+                                                                                className: "text-sm font-semibold text-blue-300 mb-1",
+                                                                                children: "Action Items:"
+                                                                            }, void 0, false, {
+                                                                                fileName: "[project]/src/app/suggestions/page.tsx",
+                                                                                lineNumber: 475,
+                                                                                columnNumber: 31
+                                                                            }, this),
+                                                                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
+                                                                                className: "list-disc pl-5 text-gray-300 text-sm",
+                                                                                children: suggestion.actionItems.map((item, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
+                                                                                        children: item
+                                                                                    }, index, false, {
+                                                                                        fileName: "[project]/src/app/suggestions/page.tsx",
+                                                                                        lineNumber: 478,
+                                                                                        columnNumber: 35
+                                                                                    }, this))
+                                                                            }, void 0, false, {
+                                                                                fileName: "[project]/src/app/suggestions/page.tsx",
+                                                                                lineNumber: 476,
+                                                                                columnNumber: 31
+                                                                            }, this)
+                                                                        ]
+                                                                    }, void 0, true, {
+                                                                        fileName: "[project]/src/app/suggestions/page.tsx",
+                                                                        lineNumber: 474,
+                                                                        columnNumber: 29
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                                         className: "flex flex-wrap gap-4 text-sm text-gray-300",
@@ -631,7 +735,7 @@ const GoalsPage = ()=>{
                                                                                         className: "w-4 h-4"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                                        lineNumber: 395,
+                                                                                        lineNumber: 487,
                                                                                         columnNumber: 33
                                                                                     }, this),
                                                                                     "Potential Impact: $",
@@ -639,7 +743,7 @@ const GoalsPage = ()=>{
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                                lineNumber: 394,
+                                                                                lineNumber: 486,
                                                                                 columnNumber: 31
                                                                             }, this),
                                                                             suggestion.deadline && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -649,7 +753,7 @@ const GoalsPage = ()=>{
                                                                                         className: "w-4 h-4"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                                        lineNumber: 401,
+                                                                                        lineNumber: 493,
                                                                                         columnNumber: 33
                                                                                     }, this),
                                                                                     "Target Date: ",
@@ -657,7 +761,7 @@ const GoalsPage = ()=>{
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                                lineNumber: 400,
+                                                                                lineNumber: 492,
                                                                                 columnNumber: 31
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -667,26 +771,26 @@ const GoalsPage = ()=>{
                                                                                         className: "w-4 h-4"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                                        lineNumber: 406,
+                                                                                        lineNumber: 498,
                                                                                         columnNumber: 31
                                                                                     }, this),
                                                                                     "Updated: Just now"
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                                lineNumber: 405,
+                                                                                lineNumber: 497,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                        lineNumber: 392,
+                                                                        lineNumber: 484,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                lineNumber: 382,
+                                                                lineNumber: 463,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -697,30 +801,30 @@ const GoalsPage = ()=>{
                                                                         className: "w-4 h-4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                        lineNumber: 414,
+                                                                        lineNumber: 506,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                lineNumber: 412,
+                                                                lineNumber: 504,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                        lineNumber: 377,
+                                                        lineNumber: 458,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, suggestion.id, false, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 373,
+                                                    lineNumber: 454,
                                                     columnNumber: 21
                                                 }, this);
                                             })
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                            lineNumber: 369,
+                                            lineNumber: 450,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -731,7 +835,7 @@ const GoalsPage = ()=>{
                                                     children: "Related Resources"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 424,
+                                                    lineNumber: 516,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -746,7 +850,7 @@ const GoalsPage = ()=>{
                                                                     children: "Emergency Fund Basics"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                    lineNumber: 427,
+                                                                    lineNumber: 519,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -754,13 +858,13 @@ const GoalsPage = ()=>{
                                                                     children: "Learn why emergency funds are crucial and how to build one efficiently."
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                    lineNumber: 428,
+                                                                    lineNumber: 520,
                                                                     columnNumber: 21
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                                            lineNumber: 426,
+                                                            lineNumber: 518,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
@@ -772,7 +876,7 @@ const GoalsPage = ()=>{
                                                                     children: "Investment Strategies for Beginners"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                    lineNumber: 431,
+                                                                    lineNumber: 523,
                                                                     columnNumber: 21
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -780,25 +884,25 @@ const GoalsPage = ()=>{
                                                                     children: "Simple approaches to building a diversified investment portfolio."
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                    lineNumber: 432,
+                                                                    lineNumber: 524,
                                                                     columnNumber: 21
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                                            lineNumber: 430,
+                                                            lineNumber: 522,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 425,
+                                                    lineNumber: 517,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                            lineNumber: 423,
+                                            lineNumber: 515,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -808,7 +912,7 @@ const GoalsPage = ()=>{
                                                     className: "w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 438,
+                                                    lineNumber: 530,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -816,30 +920,30 @@ const GoalsPage = ()=>{
                                                     children: "These suggestions are generated based on your financial history and current best practices. For personalized advice, consider consulting with a certified financial advisor."
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 439,
+                                                    lineNumber: 531,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                            lineNumber: 437,
+                                            lineNumber: 529,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                    lineNumber: 358,
+                                    lineNumber: 439,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/suggestions/page.tsx",
-                            lineNumber: 349,
+                            lineNumber: 430,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/suggestions/page.tsx",
-                        lineNumber: 348,
+                        lineNumber: 429,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -857,14 +961,14 @@ const GoalsPage = ()=>{
                                                     className: "w-5 h-5"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 453,
+                                                    lineNumber: 545,
                                                     columnNumber: 17
                                                 }, this),
                                                 "Financial Assistant"
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                            lineNumber: 452,
+                                            lineNumber: 544,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -872,13 +976,13 @@ const GoalsPage = ()=>{
                                             children: "Get answers to your financial questions"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                            lineNumber: 456,
+                                            lineNumber: 548,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                    lineNumber: 451,
+                                    lineNumber: 543,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -897,13 +1001,13 @@ const GoalsPage = ()=>{
                                                                     className: "w-4 h-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                    lineNumber: 477,
+                                                                    lineNumber: 569,
                                                                     columnNumber: 25
                                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$bot$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Bot$3e$__["Bot"], {
                                                                     className: "w-4 h-4"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                    lineNumber: 479,
+                                                                    lineNumber: 571,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -911,31 +1015,31 @@ const GoalsPage = ()=>{
                                                                     children: message.sender === 'user' ? 'You' : 'MOON.ai'
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                    lineNumber: 481,
+                                                                    lineNumber: 573,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                                            lineNumber: 475,
+                                                            lineNumber: 567,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                                             children: message.text
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                                            lineNumber: 485,
+                                                            lineNumber: 577,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 468,
+                                                    lineNumber: 560,
                                                     columnNumber: 19
                                                 }, this)
                                             }, message.id, false, {
                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                lineNumber: 464,
+                                                lineNumber: 556,
                                                 columnNumber: 17
                                             }, this)),
                                         isSending && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -950,7 +1054,7 @@ const GoalsPage = ()=>{
                                                                 className: "w-4 h-4"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                lineNumber: 493,
+                                                                lineNumber: 585,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -958,13 +1062,13 @@ const GoalsPage = ()=>{
                                                                 children: "MOON.ai"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                lineNumber: 494,
+                                                                lineNumber: 586,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                        lineNumber: 492,
+                                                        lineNumber: 584,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -974,44 +1078,44 @@ const GoalsPage = ()=>{
                                                                 className: "w-2 h-2 bg-blue-400 rounded-full animate-pulse"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                lineNumber: 497,
+                                                                lineNumber: 589,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                                 className: "w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-150"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                lineNumber: 498,
+                                                                lineNumber: 590,
                                                                 columnNumber: 23
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                                                 className: "w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-300"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                                lineNumber: 499,
+                                                                lineNumber: 591,
                                                                 columnNumber: 23
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                        lineNumber: 496,
+                                                        lineNumber: 588,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/suggestions/page.tsx",
-                                                lineNumber: 491,
+                                                lineNumber: 583,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                            lineNumber: 490,
+                                            lineNumber: 582,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                    lineNumber: 459,
+                                    lineNumber: 551,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1030,7 +1134,7 @@ const GoalsPage = ()=>{
                                                     disabled: isSending
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 508,
+                                                    lineNumber: 600,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1041,24 +1145,24 @@ const GoalsPage = ()=>{
                                                         className: "w-5 h-5 animate-spin"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                        lineNumber: 522,
+                                                        lineNumber: 614,
                                                         columnNumber: 32
                                                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$send$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Send$3e$__["Send"], {
                                                         className: "w-5 h-5"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/suggestions/page.tsx",
-                                                        lineNumber: 522,
+                                                        lineNumber: 614,
                                                         columnNumber: 78
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                                    lineNumber: 517,
+                                                    lineNumber: 609,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                            lineNumber: 507,
+                                            lineNumber: 599,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1066,44 +1170,44 @@ const GoalsPage = ()=>{
                                             children: "Ask about financial goals, investment strategies, or clarification on recommendations"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/suggestions/page.tsx",
-                                            lineNumber: 525,
+                                            lineNumber: 617,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/suggestions/page.tsx",
-                                    lineNumber: 506,
+                                    lineNumber: 598,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/suggestions/page.tsx",
-                            lineNumber: 450,
+                            lineNumber: 542,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/suggestions/page.tsx",
-                        lineNumber: 449,
+                        lineNumber: 541,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/suggestions/page.tsx",
-                lineNumber: 346,
+                lineNumber: 427,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/suggestions/page.tsx",
-        lineNumber: 324,
+        lineNumber: 405,
         columnNumber: 5
     }, this);
 };
-_s(GoalsPage, "C0zmU7xPsEYWiq52e43j2E9y+FY=");
-_c = GoalsPage;
-const __TURBOPACK__default__export__ = GoalsPage;
+_s(Suggestions, "C0zmU7xPsEYWiq52e43j2E9y+FY=");
+_c = Suggestions;
+const __TURBOPACK__default__export__ = Suggestions;
 var _c;
-__turbopack_refresh__.register(_c, "GoalsPage");
+__turbopack_refresh__.register(_c, "Suggestions");
 if (typeof globalThis.$RefreshHelpers$ === 'object' && globalThis.$RefreshHelpers !== null) {
     __turbopack_refresh__.registerExports(module, globalThis.$RefreshHelpers$);
 }

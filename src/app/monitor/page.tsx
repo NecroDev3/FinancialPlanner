@@ -387,12 +387,13 @@ const Monitor = () => {
 
       console.log('Submitting analysis:', analysisData);
       
-      // Check if we need to deploy an agent first
-      if (agentName === '') {
-        console.log('No agent found, deploying new agent...');
-        // Create a name for the agent
-        const agentNameToUse = `FinAdvisor_${walletAddress.slice(0, 6)}`;
-        
+      // Always deploy a new agent for testing purposes
+      console.log('Deploying new agent for testing...');
+      // Create a name for the agent with a timestamp to ensure uniqueness
+      const timestamp = new Date().getTime().toString().slice(-6);
+      const agentNameToUse = `FinAdvisor_${walletAddress.slice(0, 6)}_${timestamp}`;
+      
+      try {
         // Deploy agent
         const deployResponse = await fetch(`https://localhost5000/agent/deploy/${walletAddress}/${agentNameToUse}`);
         
@@ -400,20 +401,54 @@ const Monitor = () => {
         if (deployData.result === 'ok') {
           console.log('Agent deployed successfully:', deployData.name);
           setAgentName(deployData.name);
+          
+          // Store agent info in localStorage to access on results page
+          localStorage.setItem('currentAgentName', deployData.name);
+          localStorage.setItem('analysisData', JSON.stringify(analysisData));
+          localStorage.setItem('suggestions', JSON.stringify([
+            {
+              title: "Diversify Portfolio",
+              description: "Your portfolio is heavily concentrated in tech stocks. Consider adding exposure to other sectors.",
+              actionItems: ["Research ETFs for different sectors", "Allocate 20% to defensive sectors"]
+            },
+            {
+              title: "Rebalance Monthly",
+              description: "Market volatility has shifted your allocations. Consider monthly rebalancing.",
+              actionItems: ["Set up automatic rebalancing", "Review allocation targets quarterly"]
+            },
+            {
+              title: "Optimize Tax Efficiency",
+              description: "Place high-yield investments in tax-advantaged accounts to minimize tax burden.",
+              actionItems: ["Move dividend stocks to IRA", "Consider tax-loss harvesting"]
+            }
+          ]));
+          
           // Wait a moment for the agent to be fully deployed
           await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Navigate to results
+          window.location.href = '/results';
         } else {
           throw new Error(deployData.error || 'Failed to deploy agent');
         }
+      } catch (error) {
+        console.error('Error during agent deployment:', error);
+        // Wait 2 seconds even in error case
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Even if there's an error, still navigate to results page for testing
+        window.location.href = '/results';
       }
-      // Navigate to results
-      window.location.href = '/insights';
     } catch (error) {
       console.error(error);
       setErrors(prev => ({
         ...prev,
         submit: error instanceof Error ? error.message : 'Failed to submit analysis'
       }));
+      
+      // Wait 2 seconds
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Even if there's a validation error, navigate to results page for testing
+      window.location.href = '/results';
     } finally {
       setIsSubmitting(false);
     }
@@ -610,7 +645,7 @@ const Monitor = () => {
                   </>
                 ) : (
                   <>
-                    {agentName === '' ? "Create Financial Plan" : ("View "+ agentName+" Insights")}
+                    Deploy Test Agent
                     <ArrowRight className="w-5 h-5" />
                   </>
                 )}

@@ -5,7 +5,7 @@ import { Download, Filter, PieChart, ArrowUpRight, Moon, Wallet, LineChart as Li
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Link from 'next/link';
 
-const InsightsPage = () => {
+const Results = () => {
   const [activeTab, setActiveTab] = useState('summary');
   const [timeFilter, setTimeFilter] = useState('yearly');
   const [financialYear, setFinancialYear] = useState('2024');
@@ -422,8 +422,8 @@ const InsightsPage = () => {
         </div>
         <nav className="hidden sm:flex gap-8">
           <Link href="/home" className="hover:text-blue-300 transition-colors">Moon</Link>
-          <Link href="/insights" className="hover:text-blue-300 transition-colors">Insights</Link>
-          <Link href="/goals" className="hover:text-blue-300 transition-colors">Goals</Link>
+          <Link href="/results" className="hover:text-blue-300 transition-colors">Results</Link>
+          <Link href="/suggestions" className="hover:text-blue-300 transition-colors">Suggestions</Link>
         </nav>
       </header>
 
@@ -495,8 +495,8 @@ const InsightsPage = () => {
                   onChange={(e) => setTimeFilter(e.target.value)}
                   className="bg-white/5 border border-blue-800/50 rounded-lg px-3 py-2 text-white"
                 >
-                  <option value="yearly">Annual View</option>
                   <option value="monthly">Monthly View</option>
+                  <option value="yearly">Annual View</option>
                 </select>
               </div>
               <Link href="/goals" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
@@ -644,4 +644,4 @@ const InsightsPage = () => {
   );
 };
 
-export default InsightsPage;
+export default Results;
