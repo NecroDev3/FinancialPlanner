@@ -79,14 +79,6 @@ const Monitor = () => {
       localStorage.setItem('walletAddress', address);
       
       // Check if user has an agent
-      fetch('https://localhost5000/agent/has_agent/' + address)
-        .then(response => response.json())
-        .then(data => {
-          if (data.result === 'ok') {
-            setAgentName(data.name);
-          }
-        })
-        .catch(error => console.error('Error fetching agent data:', error));
     } else {
       if (baseWalletConnected) {
         handleDisconnect();
@@ -346,15 +338,7 @@ const Monitor = () => {
       setUserAccount(address);
       setWalletAddress(address);
 
-      fetch('https://localhost5000/agent/has_agent/' + address)
-        .then(response => response.json())
-        .then(data => {
-          if (data.result === 'ok') {
-            setAgentName(data.name);
-          }
-        })
-        .catch(error => console.error('Error fetching agent data:', error));
-    } catch (error) {
+      } catch (error) {
       console.error(error);
       setErrors(prev => ({
         ...prev,
@@ -395,7 +379,7 @@ const Monitor = () => {
       
       try {
         // Deploy agent
-        const deployResponse = await fetch(`https://localhost5000/agent/deploy/${walletAddress}/${agentNameToUse}`);
+        const deployResponse = await fetch(`https://localhost:5000/agent/deploy/${walletAddress}/${agentNameToUse}`);
         
         const deployData = await deployResponse.json();
         if (deployData.result === 'ok') {

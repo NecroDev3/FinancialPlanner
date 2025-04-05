@@ -147,7 +147,7 @@ const Suggestions = () => {
       console.log(`Fetching data for wallet: ${walletAddress}`);
       
       try {
-        const response = await fetch(`https://localhost5000/agent/analyze/${walletAddress}`);
+        const response = await fetch(`https://localhost:5000/agent/analyze/${walletAddress}`);
         
         if (!response.ok) {
           throw new Error(`API error: ${response.status} ${response.statusText}`);
